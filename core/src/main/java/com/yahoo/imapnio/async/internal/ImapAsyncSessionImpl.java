@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
@@ -279,6 +280,11 @@ public class ImapAsyncSessionImpl implements ImapAsyncSession, ImapCommandChanne
 
     @Override
     public ImapFuture<ImapAsyncResponse> execute(@Nonnull final ImapRequest command) throws ImapAsyncClientException {
+        return execute(command, response -> {}, error -> {}, () -> {});
+    }
+
+    @Override
+    public <T> ImapFuture<ImapAsyncResponse> execute(ImapRequest command, Consumer<ImapAsyncResponse> doneCallback, Consumer<Exception> errorCallback, Runnable canceledCallback) throws ImapAsyncClientException {
         if (isChannelClosed()) { // fail fast instead of entering to sendRequest() to fail
             throw new ImapAsyncClientException(FailureType.OPERATION_PROHIBITED_ON_CLOSED_CHANNEL, sessionId, sessionCtx);
         }
@@ -286,7 +292,7 @@ public class ImapAsyncSessionImpl implements ImapAsyncSession, ImapCommandChanne
             throw new ImapAsyncClientException(FailureType.COMMAND_NOT_ALLOWED, sessionId, sessionCtx);
         }
 
-        final ImapFuture<ImapAsyncResponse> cmdFuture = new ImapFuture<ImapAsyncResponse>();
+        final ImapFuture<ImapAsyncResponse> cmdFuture = new ImapFuture<ImapAsyncResponse>(doneCallback, errorCallback, canceledCallback);
         final String tag = getNextTag();
         requestsQueue.add(new ImapCommandEntry(command, cmdFuture, tag));
 

@@ -1,5 +1,6 @@
 package com.yahoo.imapnio.async.client;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -7,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
@@ -30,6 +32,19 @@ public class ImapFuture<V> implements Future<V> {
     private final AtomicReference<V> resultRef = new AtomicReference<V>();
     /** Wait interval when the user calls get(). */
     private static final int GET_WAIT_INTERVAL_MILLIS = 1000;
+    private final Consumer<V> doneCallback;
+    private final Consumer<Exception> exceptionCallback;
+    private final Runnable canceledCallback;
+
+    public ImapFuture(Consumer<V> doneCallback, Consumer<Exception> exceptionCallback, Runnable canceledCallback) {
+        this.doneCallback = doneCallback;
+        this.exceptionCallback = exceptionCallback;
+        this.canceledCallback = canceledCallback;
+    }
+
+    public ImapFuture() {
+        this(any -> {}, any -> {}, () -> {});
+    }
 
     /**
      * Is this Future cancelled.
@@ -54,6 +69,7 @@ public class ImapFuture<V> implements Future<V> {
     @Override
     public boolean cancel(final boolean mayInterruptIfRunning) {
         done(new CancellationException(), true);
+        canceledCallback.run();
         return true; // returned flag means success in setting cancel state.
     }
 
@@ -67,6 +83,7 @@ public class ImapFuture<V> implements Future<V> {
             if (!isDone.get()) {
                 resultRef.set(result);
                 isDone.set(true);
+                doneCallback.accept(result);
             }
             lock.notify();
         }
@@ -93,6 +110,7 @@ public class ImapFuture<V> implements Future<V> {
                 causeRef.set(cause);
                 isDone.set(true);
                 isCancelled.set(cancelled);
+                exceptionCallback.accept(cause);
             }
             lock.notify();
         }

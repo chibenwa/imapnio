@@ -1,5 +1,8 @@
 package com.yahoo.imapnio.async.client;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
 import javax.annotation.Nonnull;
 
 import com.yahoo.imapnio.async.exception.ImapAsyncClientException;
@@ -47,6 +50,21 @@ public interface ImapAsyncSession {
      * @throws ImapAsyncClientException on failure
      */
     <T> ImapFuture<ImapAsyncResponse> execute(ImapRequest command) throws ImapAsyncClientException;
+
+
+    /**
+     * Sends a IMAP command to the server.
+     *
+     * @param <T> the data type for returning in getNextCommandLineAfterContinuation call
+     *
+     * @param command the command request.
+     * @param doneCallback will be called by the future once it completes. Runs on Netty eventloop, avoid blocking!
+     * @param errorCallback will be called by the future once it fails. Runs on Netty eventloop, avoid blocking!
+     * @param canceledCallback will be called by the future once it is canceled. Runs on Netty eventloop, avoid blocking!
+     * @return the future object for this command
+     * @throws ImapAsyncClientException on failure
+     */
+    <T> ImapFuture<ImapAsyncResponse> execute(ImapRequest command, Consumer<ImapAsyncResponse> doneCallback, Consumer<Exception> errorCallback, Runnable canceledCallback) throws ImapAsyncClientException;
 
     /**
      * Terminates the current running command.
