@@ -1,6 +1,5 @@
 package com.yahoo.imapnio.async.client;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -64,7 +63,8 @@ public interface ImapAsyncSession {
      * @return the future object for this command
      * @throws ImapAsyncClientException on failure
      */
-    <T> ImapFuture<ImapAsyncResponse> execute(ImapRequest command, Consumer<ImapAsyncResponse> doneCallback, Consumer<Exception> errorCallback, Runnable canceledCallback) throws ImapAsyncClientException;
+    <T> ImapFuture<ImapAsyncResponse> execute(ImapRequest command, Consumer<ImapAsyncResponse> doneCallback,
+                                              Consumer<Exception> errorCallback, Runnable canceledCallback) throws ImapAsyncClientException;
 
     /**
      * Terminates the current running command.

@@ -1,6 +1,5 @@
 package com.yahoo.imapnio.async.client;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -32,18 +31,45 @@ public class ImapFuture<V> implements Future<V> {
     private final AtomicReference<V> resultRef = new AtomicReference<V>();
     /** Wait interval when the user calls get(). */
     private static final int GET_WAIT_INTERVAL_MILLIS = 1000;
+    /** Called when the future succeeds. */
     private final Consumer<V> doneCallback;
+    /** Called when the future fails. */
     private final Consumer<Exception> exceptionCallback;
+    /** Called when the future is canceled. */
     private final Runnable canceledCallback;
 
-    public ImapFuture(Consumer<V> doneCallback, Consumer<Exception> exceptionCallback, Runnable canceledCallback) {
+    /**
+     * Base constructor.
+     * @param doneCallback Called when the future succeeds.
+     * @param exceptionCallback Called when the future fails.
+     * @param canceledCallback Called when the future is cancelled.
+     */
+    public ImapFuture(final Consumer<V> doneCallback, final Consumer<Exception> exceptionCallback, final Runnable canceledCallback) {
         this.doneCallback = doneCallback;
         this.exceptionCallback = exceptionCallback;
         this.canceledCallback = canceledCallback;
     }
 
+    /**
+     * Default constructor with empty callbacks.
+     */
     public ImapFuture() {
-        this(any -> {}, any -> {}, () -> {});
+        this(new Consumer<V>() {
+            @Override
+            public void accept(final V v) {
+
+            }
+        }, new Consumer<Exception>() {
+            @Override
+            public void accept(final Exception e) {
+
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
     }
 
     /**

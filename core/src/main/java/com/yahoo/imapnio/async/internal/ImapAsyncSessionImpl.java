@@ -280,11 +280,29 @@ public class ImapAsyncSessionImpl implements ImapAsyncSession, ImapCommandChanne
 
     @Override
     public ImapFuture<ImapAsyncResponse> execute(@Nonnull final ImapRequest command) throws ImapAsyncClientException {
-        return execute(command, response -> {}, error -> {}, () -> {});
+        return execute(command, new Consumer<ImapAsyncResponse>() {
+            @Override
+            public void accept(final ImapAsyncResponse imapAsyncResponse) {
+
+            }
+        }, new Consumer<Exception>() {
+            @Override
+            public void accept(final Exception e) {
+
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
     }
 
     @Override
-    public <T> ImapFuture<ImapAsyncResponse> execute(ImapRequest command, Consumer<ImapAsyncResponse> doneCallback, Consumer<Exception> errorCallback, Runnable canceledCallback) throws ImapAsyncClientException {
+    public <T> ImapFuture<ImapAsyncResponse> execute(final ImapRequest command, final Consumer<ImapAsyncResponse> doneCallback,
+                                                     final Consumer<Exception> errorCallback, final Runnable canceledCallback)
+            throws ImapAsyncClientException {
+
         if (isChannelClosed()) { // fail fast instead of entering to sendRequest() to fail
             throw new ImapAsyncClientException(FailureType.OPERATION_PROHIBITED_ON_CLOSED_CHANNEL, sessionId, sessionCtx);
         }
