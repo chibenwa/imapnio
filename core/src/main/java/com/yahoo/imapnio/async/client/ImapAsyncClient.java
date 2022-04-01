@@ -172,7 +172,7 @@ public class ImapAsyncClient {
      * @param logOpt session logging option for the session to be created
      * @return the ChannelFuture object
      */
-    public Future<ImapAsyncCreateSessionResponse> createSession(@Nonnull final URI serverUri, @Nonnull final ImapAsyncSessionConfig config,
+    public ImapFuture<ImapAsyncCreateSessionResponse> createSession(@Nonnull final URI serverUri, @Nonnull final ImapAsyncSessionConfig config,
             @Nullable final InetSocketAddress localAddress, @Nullable final List<String> sniNames, @Nonnull final DebugMode logOpt) {
         return createSession(serverUri, config, localAddress, sniNames, logOpt, NA_CLIENT_CONTEXT, null);
     }
@@ -206,7 +206,7 @@ public class ImapAsyncClient {
      * @param jdkSslContext a pre-configured {@link SSLContext} which uses JDK's SSL/TLS implementation
      * @return the ChannelFuture object
      */
-    public Future<ImapAsyncCreateSessionResponse> createSession(@Nonnull final URI serverUri, @Nonnull final ImapAsyncSessionConfig config,
+    public ImapFuture<ImapAsyncCreateSessionResponse> createSession(@Nonnull final URI serverUri, @Nonnull final ImapAsyncSessionConfig config,
             @Nullable final InetSocketAddress localAddress, @Nullable final List<String> sniNames, @Nonnull final DebugMode logOpt,
             @Nonnull final Object sessionCtx, @Nullable final SSLContext jdkSslContext) {
 

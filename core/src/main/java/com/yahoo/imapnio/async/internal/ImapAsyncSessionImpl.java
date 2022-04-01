@@ -550,7 +550,29 @@ public class ImapAsyncSessionImpl implements ImapAsyncSession, ImapCommandChanne
 
     @Override
     public ImapFuture<Boolean> close() {
-        final ImapFuture<Boolean> closeFuture = new ImapFuture<Boolean>();
+        return close(new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean aBoolean) {
+
+            }
+        }, new Consumer<Exception>() {
+            @Override
+            public void accept(Exception e) {
+
+            }
+        }, new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
+    }
+
+    @Override
+    public ImapFuture<Boolean> close(final Consumer<Boolean> doneCallback,
+                                     final Consumer<Exception> errorCallback,
+                                     final Runnable canceledCallback) {
+        final ImapFuture<Boolean> closeFuture = new ImapFuture<Boolean>(doneCallback, errorCallback, canceledCallback);
         if (isChannelClosed()) {
             closeFuture.done(Boolean.TRUE);
         } else {

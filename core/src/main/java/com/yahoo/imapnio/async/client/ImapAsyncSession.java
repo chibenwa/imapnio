@@ -82,4 +82,14 @@ public interface ImapAsyncSession {
      */
     ImapFuture<Boolean> close();
 
+    /**
+     * Closes/disconnects this session.
+     *
+     * @param doneCallback will be called by the future once it completes. Runs on Netty eventloop, avoid blocking!
+     * @param errorCallback will be called by the future once it fails. Runs on Netty eventloop, avoid blocking!
+     * @param canceledCallback will be called by the future once it is canceled. Runs on Netty eventloop, avoid blocking!
+     * @return a future when it is completed. True means successful, otherwise failure.
+     */
+    ImapFuture<Boolean> close(Consumer<Boolean> doneCallback, Consumer<Exception> errorCallback, Runnable canceledCallback);
+
 }

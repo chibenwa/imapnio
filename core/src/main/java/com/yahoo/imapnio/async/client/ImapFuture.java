@@ -1,5 +1,6 @@
 package com.yahoo.imapnio.async.client;
 
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -32,11 +33,11 @@ public class ImapFuture<V> implements Future<V> {
     /** Wait interval when the user calls get(). */
     private static final int GET_WAIT_INTERVAL_MILLIS = 1000;
     /** Called when the future succeeds. */
-    private final Consumer<V> doneCallback;
+    private volatile Consumer<V> doneCallback;
     /** Called when the future fails. */
-    private final Consumer<Exception> exceptionCallback;
+    private volatile Consumer<Exception> exceptionCallback;
     /** Called when the future is canceled. */
-    private final Runnable canceledCallback;
+    private volatile Runnable canceledCallback;
 
     /**
      * Base constructor.
@@ -48,6 +49,27 @@ public class ImapFuture<V> implements Future<V> {
         this.doneCallback = doneCallback;
         this.exceptionCallback = exceptionCallback;
         this.canceledCallback = canceledCallback;
+    }
+
+    public void setDoneCallback(Consumer<V> doneCallback) {
+        this.doneCallback = doneCallback;
+        if (isDone()) {
+            Optional.ofNullable(causeRef.get()).ifPresent(exceptionCallback);
+        }
+    }
+
+    public void setExceptionCallback(Consumer<Exception> exceptionCallback) {
+        this.exceptionCallback = exceptionCallback;
+        if (isDone()) {
+            Optional.ofNullable(resultRef.get()).ifPresent(doneCallback);
+        }
+    }
+
+    public void setCanceledCallback(Runnable canceledCallback) {
+        this.canceledCallback = canceledCallback;
+        if (isDone() && isCancelled()) {
+            canceledCallback.run();
+        }
     }
 
     /**
